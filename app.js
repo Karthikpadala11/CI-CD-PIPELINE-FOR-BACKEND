@@ -1,16 +1,19 @@
+// index.js
 const express = require("express");
+const cors = require("cors");
+
 const app = express();
-const PORT = 3000;
+
+// Load environment variables (optional)
+const PORT = process.env.PORT || 3000;
+const USERNAME = process.env.USERNAME || "admin";
+const PASSWORD = process.env.PASSWORD || "1234";
+const EMAIL = process.env.EMAIL || "admin@gmail.com";
 
 // Middleware
+app.use(cors()); // Allow frontend to call backend
 app.use(express.json());
-app.use(express.static("Public"));
-
-// Dummy login data
-const user = {
-  username: "admin",
-  password: "1234"
-};
+app.use(express.static("Public")); // Serve static files from 'Public'
 
 // Dummy ticket data
 const tickets = [
@@ -22,15 +25,16 @@ const tickets = [
   { from: "Delhi", to: "Mumbai", price: 5000 }
 ];
 
+// Health check endpoint (for ALB)
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "UP" });
+});
+
 // LOGIN API
 app.post("/login", (req, res) => {
   const { username, password, email } = req.body;
 
-  if (
-    username === "admin" &&
-    password === "1234" &&
-    email === "admin@gmail.com"
-  ) {
+  if (username === USERNAME && password === PASSWORD && email === EMAIL) {
     res.json({ success: true, username, email });
   } else {
     res.json({ success: false });
@@ -65,5 +69,6 @@ app.post("/search", (req, res) => {
 
 // START SERVER
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
+

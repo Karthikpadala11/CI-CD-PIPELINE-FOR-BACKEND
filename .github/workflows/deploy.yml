@@ -48,7 +48,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST_1 }}
-          username: ec2-user
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
@@ -61,7 +61,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST_2 }}
-          username: ec2-user
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest

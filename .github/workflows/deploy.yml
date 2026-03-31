@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
@@ -16,16 +18,17 @@ jobs:
 
       # Configure AWS credentials
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
       # Login to Amazon ECR
-      - name: Login to Amazon ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: true
 
       # Build Docker image
       - name: Build Docker image
@@ -63,7 +66,4 @@ jobs:
             docker stop backend || true
             docker rm backend || true
             docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
-            docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
-            docker stop backend || true
-            docker rm backend || true
-            docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
+            

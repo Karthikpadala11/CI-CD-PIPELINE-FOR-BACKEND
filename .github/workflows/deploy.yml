@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -31,7 +31,7 @@ jobs:
         with:
           mask-password: true
 
-      # 4️⃣ Build and tag Docker image
+      # 4️⃣ Build Docker image with no-cache
       - name: Build Docker image
         run: |
           docker build --no-cache -t backend-images:latest .
@@ -42,7 +42,7 @@ jobs:
         run: |
           docker push 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
 
-      # 6️⃣ Deploy to EC2 instances
+      # 6️⃣ Deploy to EC2 #1
       - name: Deploy to EC2 #1
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -50,11 +50,17 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
+            # Stop & remove old container
             docker stop backend || true
             docker rm backend || true
+            # Remove old images
+            docker rmi backend-images:latest || true
+            docker rmi 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest || true
+            # Pull latest image and run
+            docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
             docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
 
+      # 7️⃣ Deploy to EC2 #2
       - name: Deploy to EC2 #2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -62,7 +68,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
             docker stop backend || true
             docker rm backend || true
+            docker rmi backend-images:latest || true
+            docker rmi 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest || true
+            docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
             docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
+            

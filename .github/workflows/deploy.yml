@@ -26,7 +26,7 @@ jobs:
 
       # Login to Amazon ECR
       - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@v3
         with:
           mask-password: true
 

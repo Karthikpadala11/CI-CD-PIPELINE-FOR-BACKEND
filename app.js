@@ -23,6 +23,7 @@ const tickets = [
   { from: "Pune", to: "Bangalore", price: 5000 },
   { from: "Mumbai", to: "Goa", price: 3500 },
   { from: "Delhi", to: "Mumbai", price: 5000 }
+   { from: "Tirupati", to: "Nagpur", price: 3000 }
 ];
 
 // Health check endpoint (for ALB)

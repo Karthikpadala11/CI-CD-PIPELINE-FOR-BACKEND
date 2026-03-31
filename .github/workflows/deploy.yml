@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
@@ -26,7 +24,7 @@ jobs:
 
       # Login to Amazon ECR
       - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v3
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: true
 
@@ -65,5 +63,4 @@ jobs:
             docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
             docker stop backend || true
             docker rm backend || true
-            docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
-            
+            docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest         

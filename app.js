@@ -18,7 +18,7 @@ app.use(express.static("Public")); // Serve static files from 'Public'
 // Dummy ticket data
 const tickets = [
   { from: "Nagpur", to: "Pune", price: 3000 },
-  { from: "Nagpur", to: "Mumbai", price: 5000 },
+  { from: "Nagpur", to: "Mumbai", price: 54000 },
   { from: "Delhi", to: "Mumbai", price: 6000 },
   { from: "Pune", to: "Bangalore", price: 5000 },
   { from: "Mumbai", to: "Goa", price: 3500 },

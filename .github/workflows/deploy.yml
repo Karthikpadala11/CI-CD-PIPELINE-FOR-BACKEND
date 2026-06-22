@@ -27,7 +27,7 @@ jobs:
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::949156002967:role/YOUR_OIDC_ROLE_NAME
+          role-to-assume: arn:aws:iam::516035591988:role/demo
           aws-region: ap-south-1
 
       - name: Verify OIDC access

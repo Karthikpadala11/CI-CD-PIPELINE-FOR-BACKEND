@@ -7,40 +7,44 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  AWS_REGION: ap-south-1
+  AWS_ACCOUNT_ID: 949156002967
+  ECR_REPOSITORY: backend-images
+  IMAGE_TAG: latest
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      #Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      #Configure AWS credentials (for ECR push)
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::949156002967:role/YOUR_OIDC_ROLE_NAME
           aws-region: ap-south-1
 
-      #Login to ECR (on GitHub runner, to push Docker image)
+      - name: Verify OIDC access
+        run: aws sts get-caller-identity
+
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      #Build Docker image
       - name: Build Docker image
         run: |
           docker build -t backend-images:latest .
           docker tag backend-images:latest 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
 
-      #Push Docker image to ECR
       - name: Push Docker image to ECR
         run: |
           docker push 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
 
-      #Deploy to EC2 #1
       - name: Deploy to EC2 #1
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -48,22 +52,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Login to ECR on EC2
             aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 949156002967.dkr.ecr.ap-south-1.amazonaws.com
-
-            # Stop & remove old container
             docker stop backend || true
             docker rm backend || true
-
-            # Remove old images
             docker rmi backend-images:latest || true
             docker rmi 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest || true
-
-            # Pull latest image and run
             docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
             docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
 
-      #Deploy to EC2 #2
       - name: Deploy to EC2 #2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -71,17 +67,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Login to ECR on EC2
             aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 949156002967.dkr.ecr.ap-south-1.amazonaws.com
-
-            # Stop & remove old container
             docker stop backend || true
             docker rm backend || true
-
-            # Remove old images
             docker rmi backend-images:latest || true
             docker rmi 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest || true
-
-            # Pull latest image and run
             docker pull 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
             docker run -d -p 3000:3000 --name backend --restart unless-stopped 949156002967.dkr.ecr.ap-south-1.amazonaws.com/backend-images:latest
